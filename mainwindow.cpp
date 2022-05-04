@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->listView_contacts->setModel(SortFilterProxyContactsModel);
     ui->listView_contacts->setModelColumn(1);
 
-    UpdateContacts(); //+
+    UpdateContacts();
 
 
 
