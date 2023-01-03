@@ -7,6 +7,20 @@
 #include <QListWidget>
 #include <QLineEdit>
 
+class dynamicLineEdit : public QLineEdit
+{
+    Q_OBJECT
+public:
+    explicit dynamicLineEdit(QWidget *parent = 0);
+    ~dynamicLineEdit();
+    dynamicLineEdit();
+    static int IdUp;
+    int getID(); // Функция для возврата локального номера кнопки
+private:
+    int frameID = 0;
+};
+
+
 class dynamicFrame : public QFrame
 {
     Q_OBJECT
@@ -33,6 +47,23 @@ public:
     int getID();// Функция для возврата локального номера кнопки
 private:
     int buttonID = 0;
+};
+
+class dynamicButtonMainOrNotMainPhone : public QPushButton
+{
+    Q_OBJECT
+public:
+    explicit dynamicButtonMainOrNotMainPhone(QWidget *parent = 0);
+    ~dynamicButtonMainOrNotMainPhone();
+    dynamicButtonMainOrNotMainPhone();
+    int id, mainStatus;
+    void setID(QString a);   // Статическая переменная, счетчик номеров кнопок
+    void setMainStatus(QString a);
+    int getID();// Функция для возврата локального номера кнопки
+    int getMainStatus();
+private:
+    int buttonID = 0;
+    int MainStatus = 0;
 };
 
 class dynamicButton_Delete_contacts : public QPushButton
@@ -62,6 +93,33 @@ public:
 private:
     int buttonID = 0;
 };
+
+class DynamicButton_Delete_clientPhone : public QPushButton{
+    Q_OBJECT
+public:
+    explicit DynamicButton_Delete_clientPhone(QWidget *parent = 0);
+    ~DynamicButton_Delete_clientPhone();
+    DynamicButton_Delete_clientPhone();
+    int id;
+    void setID(QString a);   // Статическая переменная, счетчик номеров кнопок
+    int getID();// Функция для возврата локального номера кнопки
+private:
+    int buttonID = 0;
+};
+
+class DynamicButton_Delete_clientAddress : public QPushButton{
+    Q_OBJECT
+public:
+    explicit DynamicButton_Delete_clientAddress(QWidget *parent = 0);
+    ~DynamicButton_Delete_clientAddress();
+    DynamicButton_Delete_clientAddress();
+    int id;
+    void setID(QString a);   // Статическая переменная, счетчик номеров кнопок
+    int getID();// Функция для возврата локального номера кнопки
+private:
+    int buttonID = 0;
+};
+
 
 
 

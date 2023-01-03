@@ -4,6 +4,28 @@
 #include <QHBoxLayout>
 #include <QListWidget>
 
+dynamicLineEdit::dynamicLineEdit(QWidget *parent) :
+    QLineEdit(parent)
+{
+    IdUp++;            // Увеличение счетчика на единицу
+    frameID = IdUp;   /* Присвоение кнопке номера, по которому будет производиться
+                         * дальнейшая работа с кнопок
+                         * */
+}
+int dynamicLineEdit::IdUp = 0;
+
+int dynamicLineEdit::getID()
+{
+    return frameID;
+}
+
+dynamicLineEdit::~dynamicLineEdit()
+{
+
+}
+
+//---------------------------------------------------------------------------------
+
 dynamicFrame::dynamicFrame(QWidget *parent) :
     QFrame(parent)
 {
@@ -46,6 +68,36 @@ dynamicButton::~dynamicButton()
 
 }
 
+//--------------------------------------------------------------------------------
+
+dynamicButtonMainOrNotMainPhone::dynamicButtonMainOrNotMainPhone(QWidget *parent) :
+    QPushButton(parent)
+{
+
+}
+
+void dynamicButtonMainOrNotMainPhone::setID(QString a){
+     id = a.toInt();
+}
+
+int dynamicButtonMainOrNotMainPhone::getID()
+{
+    return id;
+}
+
+void dynamicButtonMainOrNotMainPhone::setMainStatus(QString a){
+     mainStatus = a.toInt();
+}
+
+int dynamicButtonMainOrNotMainPhone::getMainStatus()
+{
+    return mainStatus;
+}
+
+dynamicButtonMainOrNotMainPhone::~dynamicButtonMainOrNotMainPhone()
+{
+
+}
 
 //-----------------------------------------------------------------------------------
 
@@ -65,6 +117,50 @@ int dynamicButton_Delete_contacts::getID()
 }
 
 dynamicButton_Delete_contacts::~dynamicButton_Delete_contacts()
+{
+
+}
+
+//-----------------------------------------------------------------------------------
+
+DynamicButton_Delete_clientPhone::DynamicButton_Delete_clientPhone(QWidget *parent) :
+    QPushButton(parent)
+{
+
+}
+
+void DynamicButton_Delete_clientPhone::setID(QString a){
+     id = a.toInt();
+}
+
+int DynamicButton_Delete_clientPhone::getID()
+{
+    return id;
+}
+
+DynamicButton_Delete_clientPhone::~DynamicButton_Delete_clientPhone()
+{
+
+}
+
+//-----------------------------------------------------------------------------------
+
+DynamicButton_Delete_clientAddress::DynamicButton_Delete_clientAddress(QWidget *parent) :
+    QPushButton(parent)
+{
+
+}
+
+void DynamicButton_Delete_clientAddress::setID(QString a){
+     id = a.toInt();
+}
+
+int DynamicButton_Delete_clientAddress::getID()
+{
+    return id;
+}
+
+DynamicButton_Delete_clientAddress::~DynamicButton_Delete_clientAddress()
 {
 
 }

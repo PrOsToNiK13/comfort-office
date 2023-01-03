@@ -8,23 +8,34 @@ CONFIG += c++11
 
 
 SOURCES += \
-    auth.cpp \
+    authwindow.cpp \
     database.cpp \
+    dublicatesoutput.cpp \
     dynamicFields.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
-    auth.h \
+    authwindow.h \
     database.h \
+    dublicatesoutput.h \
     dynamicFields.h \
     mainwindow.h
 
 FORMS += \
-    auth.ui \
+    authwindow.ui \
+    dublicatesoutput.ui \
     mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    recources.qrc
+
+win32:RC_FILE = file.rc
+
+
+

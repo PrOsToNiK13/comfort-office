@@ -7,19 +7,19 @@ database::database()
 
 }
 
-void database::connectToDataBase()
+bool database::connectToDataBase(QString path)
 {
-       if(!QFile("clients.db").exists()){
-           restoreDataBase();
+       if(!QFile(path).exists()){
+           return restoreDataBase(path);
        } else {
-           openDataBase();
+           return openDataBase(path);
        }
 }
 
-bool database::openDataBase()
+bool database::openDataBase(QString path)
 {
     QSqlDatabase sdb = QSqlDatabase::addDatabase("QSQLITE");
-    sdb.setDatabaseName("clients.db");
+    sdb.setDatabaseName(path);
     if(sdb.open()){
          return true;
     } else {
@@ -27,9 +27,9 @@ bool database::openDataBase()
     }
 }
 
-bool database::restoreDataBase()
+bool database::restoreDataBase(QString path)
 {
-        if(openDataBase()){
+        if(openDataBase(path)){
             return (createTables() ? true : false);
         } else {
             qDebug() << "Не удалось восстановить базу данных";
@@ -44,18 +44,19 @@ bool database::createTables()
     bool isOK = true;
     if(!query.exec( "CREATE TABLE users("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    "showAllClientsInDefault INTEGER,"
                     "name VARCHAR(50),"
                     "password VARCHAR(50));")){
         isOK = false;
+        qDebug() << "users created";
     }
-    if(!query.exec( "CREATE TABLE clients ("
+    if(!query.exec( "CREATE TABLE clients("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                     "companyName VARCHAR(50),"
-                    "phone VARCHAR(50),"
-                    "address VARCHAR (50),"
                     "username VARCHAR(50),"
                     "isActive INTEGER);")){
         isOK= false;
+        qDebug() << "clients created";
     }
     if(!query.exec( "CREATE TABLE notes("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -63,22 +64,7 @@ bool database::createTables()
                     "text VARCHAR(200),"
                     "date VARCHAR(30));")){
         isOK = false;
-    }
-    if(!query.exec(" CREATE TABLE contacts("
-                   "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                   "fullName VARCHAR(150),"
-                   "surname VARCHAR(50),"
-                   "name VARCHAR(50),"
-                   "middleName VARCHAR(50),"
-                   "phone VARCHAR(50),"
-                   "email VARCHAR(100),"
-                   "username VARCHAR(50));")){
-        isOK = false;
-    }
-    if(!query.exec("CREATE TABLE assignment("
-                   "companyId INTEGER,"
-                   "contactId INTEGER);")){
-        isOK = false;
+        qDebug() << "notes created";
     }
     if(!query.exec("CREATE TABLE documents("
                    "id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -87,17 +73,35 @@ bool database::createTables()
                    "file BLOB NOT NULL,"
                    "extention VARCHAR(50));")){
         isOK = false;
+        qDebug() << "documents created";
+    }
+    if(!query.exec("CREATE TABLE clientPhones("
+                   "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                   "mainStatus INTEGER,"
+                   "companyId INTEGER,"
+                   "fullName VARCHAR(50),"
+                   "information VARCHAR(50),"
+                   "phone VARCHAR(20),"
+                   "email VARCHAR(50));")){
+        isOK = false;
+        qDebug() << "clientPhones created";
+    }
+    if(!query.exec("CREATE TABLE clientAddresses("
+                   "companyId INTEGER,"
+                   "address VARCHAR(50),"
+                   "information VARCHAR(50));")){
+        isOK = false;
+        qDebug() << "clientAddresses created";
     }
     if (isOK){
         qDebug() << "Таблицы созданы!";
         return true;
     } else {
-        qDebug() << "DataBase: error of create ";
+        qDebug() << "DataBase: error of create";
         return false;
     }
     return false;
 }
-
 
 
 
@@ -111,13 +115,12 @@ void database::DeleteFromActiveClients(QString id)
     }
 }
 
-void database::RedactActiveClients(QString name, QString phone, QString address, QString id)
+void database::RedactActiveClients(QString name, QString id, QString username)
 {
     QSqlQuery query;
-    query.prepare("UPDATE clients SET companyName = :name, phone = :phone, address = :address WHERE id = :id");
+    query.prepare("UPDATE clients SET companyName = :name, username = :username WHERE id = :id");
     query.bindValue(":name", name);
-    query.bindValue(":phone", phone);
-    query.bindValue(":address", address);
+    query.bindValue(":username", username);
     query.bindValue(":id", id);
     if (!query.exec()){
         qDebug() << "Ошибка редактирования компании!";
@@ -135,14 +138,12 @@ void database::UpdateActiveStatusOfCompany(QString id, QString status)
     }
 }
 
-void database::InsertToActiveClients(QString name, QString phone, QString address, QString username, QString activeStatus)
+void database::InsertToClients(QString name, QString username, QString activeStatus)
 {
     QSqlQuery query;
-    query.prepare("INSERT INTO clients (companyName, phone, address, username, isActive)"
-                  "VALUES (:companyName, :phone, :address, :username, :isActive);");
+    query.prepare("INSERT INTO clients (companyName, username, isActive)"
+                  "VALUES (:companyName, :username, :isActive);");
     query.bindValue(":companyName", name);
-    query.bindValue(":phone", phone);
-    query.bindValue(":address", address);
     query.bindValue(":username", username);
     query.bindValue(":isActive", activeStatus);
     if (!query.exec()){
@@ -178,6 +179,62 @@ void database::DeleteFromNotes(QString companyID)
     }
 }
 
+
+
+
+
+
+void database::InsertToClientPhones(QString mainStatus, QString companyId, QString fullName, QString information, QString phone, QString email)
+{
+    QSqlQuery query;
+    query.prepare("INSERT INTO clientPhones (mainStatus, companyId, fullName, information, phone, email)"
+                  "VALUES (:mainStatus, :companyId, :fullName, :information, :phone, :email);");
+    query.bindValue(":mainStatus", mainStatus);
+    query.bindValue(":companyId", companyId);
+    query.bindValue(":fullName", fullName);
+    query.bindValue(":information", information);
+    query.bindValue(":phone", phone);
+    query.bindValue(":email", email);
+    if (!query.exec()){
+        qDebug() << "Ошибка записи в таблицу clientPhones!";
+    }
+}
+
+void database::DeletaAllPhonesFromClient(QString companyId){
+    QSqlQuery query;
+    query.prepare("DELETE FROM clientPhones WHERE companyId = :companyId");
+    query.bindValue(":companyId", companyId);
+    if (!query.exec()){
+        qDebug() << "Ошибка удаления из таблицы clientPhones!";
+    }
+}
+
+
+
+
+
+void database::InsertToClientAddresses(QString companyId, QString address, QString information)
+{
+    QSqlQuery query;
+    query.prepare("INSERT INTO clientAddresses (companyId, address, information)"
+                  "VALUES (:companyId, :address, :information);");
+    query.bindValue(":companyId", companyId);
+    query.bindValue(":address", address);
+    query.bindValue(":information", information);
+    if (!query.exec()){
+        qDebug() << "Ошибка записи в таблицу clientPhones!";
+    }
+}
+
+void database::DeleteAllAddressesFromClient(QString companyId)
+{
+    QSqlQuery query;
+    query.prepare("DELETE FROM clientAddresses WHERE companyId = :companyId");
+    query.bindValue(":companyId", companyId);
+    if (!query.exec()){
+        qDebug() << "Ошибка удаления из таблицы clientAddresses!";
+    }
+}
 
 
 
@@ -228,101 +285,6 @@ bool database::RedactPass(QString username, QString oldpass, QString newpass)
         return true;
     } else {
         return false;
-    }
-}
-
-
-
-
-
-
-void database::InsertToContacts(QString fullName, QString surname, QString name, QString middleName, QString phone, QString email, QString username)
-{
-    QSqlQuery query;
-    query.prepare("INSERT INTO contacts (fullName, surname, name, middleName, phone, email, username)"
-                  "VALUES (:fullName, :surname, :name, :middleName, :phone, :email, :username);");
-    query.bindValue(":fullName", fullName);
-    query.bindValue(":surname", surname);
-    query.bindValue(":name", name);
-    query.bindValue(":middleName", middleName);
-    query.bindValue(":phone", phone);
-    query.bindValue(":email", email);
-    query.bindValue(":username", username);
-    if (!query.exec()){
-        qDebug() << "Ошибка записи в таблицу contacts!";
-    }
-}
-
-void database::RedactContacts(QString fullName, QString surname, QString name, QString middleName, QString phone, QString email, QString id)
-{
-    QSqlQuery query;
-    query.prepare("UPDATE contacts SET fullName = :fullName, surname = :surname, name = :name, middleName = :middleName, phone = :phone, email = :email WHERE id = :id");
-    query.bindValue(":fullName", fullName);
-    query.bindValue(":surname", surname);
-    query.bindValue(":name", name);
-    query.bindValue(":middleName", middleName);
-    query.bindValue(":phone", phone);
-    query.bindValue(":email", email);
-    query.bindValue(":id", id);
-    if (!query.exec()){
-        qDebug() << "Ошибка редактирования контакта!";
-    }
-}
-
-void database::DeleteFromContacts(QString id)
-{
-    QSqlQuery query;
-    query.prepare("DELETE FROM contacts WHERE id= :ID;");
-    query.bindValue(":ID", id);
-    if(!query.exec()){
-        qDebug() << "Ошибка удаления из таблицы contacts";
-    }
-}
-
-
-
-
-
-void database::AddAssignment(QString companyId, QString contactId)
-{
-    QSqlQuery query;
-    query.prepare("INSERT INTO assignment (companyId, contactId)"
-                      "VALUES (:companyId, :contactId);");
-    query.bindValue(":companyId", companyId);
-    query.bindValue(":contactId", contactId);
-    if (!query.exec()){
-        qDebug() << "Ошибка записи в таблицу assignment!";
-    }
-}
-
-void database::DeleteContactsAssignments(QString contactId)
-{
-    QSqlQuery query;
-    query.prepare("DELETE  FROM assignment WHERE contactId = :contactsId");
-    query.bindValue(":contactId", contactId);
-    if (!query.exec()){
-        qDebug() << "Ошибка удаления из таблицы assignment!";
-    }
-}
-
-void database::DeleteClientsAssignments(QString companyId)
-{
-    QSqlQuery query;
-    query.prepare("DELETE  FROM assignment WHERE companyId = :companyId");
-    query.bindValue(":companyId", companyId);
-    if (!query.exec()){
-        qDebug() << "Ошибка удаления из таблицы assignment!";
-    }
-}
-
-void database::DeleteAssignmentFromClient(QString companyId, QString contactId)
-{
-    QSqlQuery query;
-    query.prepare("DELETE FROM assignment WHERE contactId = :contactId AND companyId = :companyId");
-    query.bindValue(":contactId", contactId);
-    query.bindValue(":companyId", companyId);
-    if (!query.exec()){
-        qDebug() << "Ошибка удаления из таблицы assignment!";
     }
 }
 

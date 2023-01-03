@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>images/link.png</file>
+        <file>images/link_32.png</file>
+        <file>images/arrow_left.png</file>
+        <file>images/arrow_right.png</file>
+        <file>images/doc-icon.png</file>
+        <file>images/dark_theme_small.png</file>
+        <file>images/search-13-24 grey.png</file>
+        <file>images/map-marker-black-24.png</file>
+        <file>images/info-black-24.png</file>
+        <file>images/administrator-black-24.png</file>
+        <file>images/email-black-24.png</file>
+        <file>images/phone-black-24.png</file>
+        <file>images/plus-8-12.png</file>
+        <file>images/minus-white-12.png</file>
+        <file>images/edit-white-12.png</file>
+        <file>images/trash-white-12.png</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>app_icon.ico</file>
+    </qresource>
+</RCC>
